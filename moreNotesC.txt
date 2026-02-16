@@ -1,0 +1,776 @@
+
+$0.addEventListener("click", function(event){
+    console.log(event);
+});
+
+    where addEventListener is a higher order function that can take another function as an argument.
+    where function(e) is a callback function that returns a function based on the action (ie: click)
+
+Shell -> User interface to interact with Kernel
+    GUI
+    Command Line
+Kernel -> Actual program that interfaces with hardware
+
+Commands
+    ls
+    mkdir
+        to create folder (directory)
+    cd 
+        .. to return to parent dir
+    touch
+        to create file
+    start
+        to open file
+    rm
+        to delete file
+        -r to remove directory
+    pwd
+        print working directory
+    rm *
+        to remove all
+
+Javascript
+    Node allows to run on computer
+    Express is specialized for creating web applications
+
+React
+	Destructuring means unpacking objects into variables
+	const { firstname, lastname } = user
+
+	Spread operator ...
+	Copy all entries of an array
+	const [ ... array, 'C', 'D', 'E']
+	cosnt { .... object, name: "newName"}
+
+	Array methods
+	filter() can remove items, find() can pick specific items, includes() can check conditions
+	map() can turn data into UI -> Ex: We can use map and a loop to loop over every product and change UI for each one
+
+	Ternary operator
+	condition ? valueIfTrue : valueIfFalse
+	Ex: InStock ? <p> Buy </p> : <p> Sold Out < /p>
+	condtion && valueIfTrue
+
+	AND
+	If left side is true, React uses right side (conditionally rendering elements)
+
+	Optional chaining
+	user?.firstName -> Only works if user exists
+	?? 'Guest' is used when firstName does not exist
+
+	export default component
+	import from .
+	
+	Promises
+	Fullfilled, pending, rejected
+	fetch
+	.then (if fulfilled)
+	.catch (if rejected)
+
+	State
+		Change appearance in UI based on user actions
+		Declarative programming -> Declaring how UI will look based on state
+		Imperative programming -> Telling element to do something different directly (ie: GetElementById)
+	Hooks
+		Function that allow us to hook into state to allow us to modify UI
+		useState:
+
+			const [count, setCount] = useState(default value);
+			function increase(){
+				setCount(count + 1);
+			}
+
+			<h1>{count}</h1>
+			<button onClick = {increase}>+</button>
+
+		useState returns array with value, function. We can use it to map to buttons like here where pressing + will call {increase} which calls setCount and increases count + 1
+        Stores data (state)
+        You need to keep track of values
+        Those values change over time
+        Changing them should re-render the UIs
+
+        useEffect
+        This is for code that interacts with the outside world or happens after rendering.
+
+        You use it for:
+
+        API calls
+
+        Timers
+
+        Subscriptions
+
+        DOM manipulation
+
+        Logging
+
+        Syncing with localStorage (like your profile app)
+
+
+	Controlled Components
+		Making React state be single source instead of separating HTML and React states. React component renders a form also controls what happens in that form on subsequent user input. Input form element whose value is controleld by React is Controlled Component.
+        You pass value={state} and update with onChange.
+        Pros: easy validation, conditional UI, consistent form submission, reset, etc.
+        Cons: more re-renders / more code.
+
+    Uncontrolled
+        The DOM keeps the value; React reads it when needed (via ref).
+        Pros: simpler for quick forms, fewer re-renders while typing.
+        Cons: harder live validation / dynamic behavior.
+
+    Lifting state 
+        When two (or more) sibling components need the same data, move the state up to their closest common parent and pass it down via props.
+        Child A updates via callback prop (onChangeX)
+        Child B reads via prop (x)
+
+    Props -> Inputs to a component passed from parent. Read only inside the child.
+    State -> Internal, owned by the component. Changes over time via setState/useState. Is like the memory of the component
+
+TypeScript
+    Wrong prop type/name: passing onClik instead of onClick, or id as number when string expected.
+    Null/undefined access (with strictNullChecks): user.name when user could be null.
+    Wrong function signatures: callback expects (id: string) but you pass (id: number).
+    Array/object shape drift: API returns { results: User[] } but you treat it like User[].
+    Exhaustiveness with unions: you forgot to handle a "error" state in a switch.
+    Mis-typed events/DOM APIs: using e.target.value on something that doesn’t have value.
+    Ref misuse: calling methods on ref.current without checking it exists / correct element type.
+
+Asynch
+
+	const event = new Promise((resolve, reject) => {
+		// logic
+		ie: if { resolve() }
+		else { reject() }
+	});
+
+	.then() called if resolve()
+	
+	then((name) =>{
+		console.log(name);
+	});
+
+	.catch() called if reject()
+
+	.catch((err) =>{
+		console.log(err);
+	});
+
+	.finally() called regardless.
+
+	In practice:
+	
+	const data = axios.get(some URL);
+
+	data.then((res) =>{
+		console.log(res.data);
+	}).catch((err) => {
+		console.log(err);
+	}).finally(() =>{
+
+	});
+
+	we can also do:
+
+	const fetchData = asynch() => {
+		try{
+			const data = await axios.get(some URL);
+			console.log(data);
+		}catch(err){
+			console.log(err);
+		}finally{
+
+		}
+	};
+
+Arrow functions
+
+	export const DoSomething = () =>{
+
+	}
+
+React
+
+	
+Generics
+
+    // Generics
+    int[] intArray = { 1, 2, 3 };
+    double[] doubleArray = { 1.0, 2.0, 3.0 };
+    String[] stringArray = { "1", "2", "3" };
+
+    displayElements<int>(intArray);
+    displayElements<double>(doubleArray);
+    displayElements<String>(stringArray);
+
+    public static void displayElements<T>(T[] array) 
+    {
+
+        foreach (T t in array) 
+        {
+            Console.WriteLine(t + " ");
+        }
+    }
+
+Delegates / Events
+
+    Delegates are type safe function pointers. Stores a method in variable and calls later -> 
+    
+        public delegate int MathOperation(int a, int b);
+        
+        int Add(int x, int y) => x + y;
+        MathOperation op = Add;
+        int result = op(2, 3); // 5
+
+    Enables callbacks, strategy patterns, event systems, LINQ, async APIs 
+
+    Built in
+        Func<int, int, int> add = (a, b) => a + b; // Returns value and used to compute somthing
+        Action<string> log = msg => Console.WriteLine(msg); // Returns void and used to do something
+        Predicate<int> isEven = n => n % 2 == 0; // Returns boolean and used for testing
+
+    Multicast Delegates
+        Action notify = () => Console.WriteLine("Email sent");
+        notify += () => Console.WriteLine("SMS sent");
+
+        notify(); // Will output Email sent and SMS sent
+
+    Can be invoked by outsiders and can be reassigned. 
+
+
+
+    Events are delegates with rules -> Only owner can raise it and subscribers can add/remove, not invoke.
+
+    public class Button
+    {
+        public event Action Clicked;
+
+        public void Click()
+        {
+            Clicked?.Invoke();
+        }
+    }
+
+    var button = new Button();
+
+    button.Clicked += () => Console.WriteLine("Button was clicked!");
+    button.Click();
+
+    // Outputs "Button was clicked"
+
+    Intended for notifications more than callbacks like Delegates
+
+
+linq
+    Language Integrated Query
+    find, sort, filter data
+
+    ex: var adventures = games.Where(g => g.Genre == "Adventure");
+
+    Lambda expressions -> Shortcut to write tiny functions
+
+    ex: g => g.Title is same as get Title 
+
+    .Select returns an IEnumerable<out T> whose elements are the result of invoking the transform function on each element of source.
+
+    .Where filters a sequence of values based on a predicate.
+
+    .Any determines whether sequence contains any elements that satisfies a condition. True if not empty (ex: games.Any(g=>g.ReleaseYear > 2020);)
+
+    .OrderBy orders list depending on condition (ex: games.OrderBy(g => g.ReleaseYear);)
+
+    .Average returns average of sequence (ex: games.Average(g => g.Price);)
+
+    .Min, .Max
+
+    .First returns first element of list (ex: games.First(g => g.Rating > 0);)
+
+    .GroupBy groups by condition (ex: games.GroupBy(g => g.Genre);)
+
+    Chaining
+        games
+        .Where(g => g.Genre == "RPG" && g.Price <= 30)
+        .OrderBy(g => g.Rating)
+        .Select(g => $"{g.Title} - ${g.Price}")
+        
+    .Skip bypasses elements (ex: games.Skip(2).Take(2);) skips first 2 elements then displays next two
+
+    SQL -> 
+        games.Where(g => g.Genre == "RPG"); is the same as
+        from g in games where g.Genre == "RPG" select g;
+
+    Chaining
+        games.OrderBy(g => g.Price).First();
+
+    .Disctinct() removes duplicates
+
+API Controller  
+
+    Receives HTTP requests (routing: URL + verb).
+    Validates/parses input (query params, route params, JSON body).
+    Calls business/data logic (often via services/repositories/DbContext).
+    Returns HTTP responses (status codes + JSON).
+
+Dependency Injection in .NET
+    DI is a design pattern where objects receive their dependencies from external sources rather than creating them internally.
+    Transient → new instance every time
+    Scoped → one per HTTP request (most common)
+    Singleton → one for entire app lifetime 
+    Loose coupling (the degree of interdependence between software modules, a measure of how closely connected two routines or modules are, and the strength of the relationships between module), easier testing, better code organization
+
+Middleware and Request Pipeline
+    Middleware are components that form a pipeline to handle HTTP requests and responses. Each component can process the request, pass it to the next component, or short-circuit the pipeline.
+    Request flow:
+        Request → Middleware 1 → Middleware 2 → Endpoint → Middleware 2 → Middleware 1 → Response
+
+DTOs (Data Transfer Objects) and AutoMapper
+    DTOs are objects that carry data between processes. They help separate your domain models from API responses.
+    Control what data is exposed to clients
+    Different representations for different scenarios
+    Avoid over-posting attacks
+    Decouple API from database schema
+
+Asynch 
+
+    public asynch Task<String> boilWater()
+
+        await Task.Delay(2000);
+
+    Task is bridge between state machine that Asynch creates
+    Await is the checkpoint within state machine
+
+    When we call asynch task, Main (which sits on .NET) goes to OS, so if we call an HTTP call, OS calls Network with an asynch flag.
+    async/await does not create new threads. It frees the thread while waiting (I/O). Uses the Thread Pool. Improves scalability, not speed
+    Async/await is about non-blocking I/O, not parallel execution.
+
+EF
+    Object Relational Mapper 
+        Maps C# classes to database tables
+        Translates LINQ queries to SQL 
+        Tracks changes to entities
+        Persists changes with SaveChanges()/SaveChangesAsync()
+
+    Navigation Properties are properties on your entity classes that reference related entities. They represent the relationships between tables in your database.
+    Types of relationships can be one to one, one to many, many to many.
+    Nativation properties make code cleaner, allow EF Core to automatically handle relationships, enables eager/lazy loading of data and reflects the real-world relationships in your domain
+    
+    Migrations
+        Versioned, incremental changes to database schema to keep it in sync with the application's data model (the C# classes and DbContext) while preserving existing data.  
+            You change your model classes → create a migration → EF generates schema diffs.
+            Apply them to update the DB schema over time.
+            Useful for team workflows + deployment consistency.
+        EF Core then generates a migration file with code to apply (Up method) and revert (Down method) those changes. 
+        Commands
+            add-migration [name]: Scaffolds a new migration file based on the latest changes in the data model.
+            update-database: Applies any pending migrations to the database, bringing the schema to the latest version.
+            remove-migration: Deletes the most recent migration if it hasn't been applied to the database.
+            update-database [TargetMigrationName]: Reverts the database to a specific previous migration.
+            script-migration: Generates a SQL script of the migrations, which can be useful for applying changes in production environments where direct tool access might be restricted. 
+        Benefits
+            Schema Evolution -> Allows DB schema to adapt as application requirements change 
+            Version control -> Migration files are stored in source control, providing history of all DB changes.
+            Consistency -> Ensures instances of DB are in consistent state, reducing errors and inconsistencies
+            Automation -> Automates process of generating and executing schema updates
+
+    DB Context:
+        EF Core main entry point
+        Represents a session/unit of work with DB
+        Exposes DbSet<TEntity> (tables/collections)
+        Tracks entity changes 
+        Executes queries and saves updates 
+
+Minimal APIs (.NET 6 feature)
+    app.MapGet("/products", () => products);
+
+    Lighter alternative to controllers
+    Faster startup
+    Good for small APIs
+    Controllers still preferred for complex apps
+
+Eager v Lazy loading
+    Eager loads related data immediately with the main Query. It uses .Include() method and executes a JSON query to get all data at once. Predictable, fewer queries, but might load unnecessary data. Still use as default choice.
+    Lazy loading only loads related data when you access it. Requires virtual properties and proxy package. Executes seaparate queries when you access navigation properties. N+1 query problems, less predictable. Avoid in most cases.
+    Explicit loading is manually load related data when needed. Use _context.Entry(entity).Collection().LoadAsync() -> Use only with UIs with unpredictable access patterns.
+
+Migrations (track DB changes)
+    Code files that represent changes to your database shema. They allow version control of your database structure. Key concepts are that each migration has an Up method (apply changes) and a Down method (revert changes). Migrations are sequential
+    EF core tracks which migrations have been applied in a __EFMigrationsHistory table
+
+Best practice
+    Always pull latest code before creating migration to prevent conflicts when multiple devs working on same project. Use descriptive migration names such as AddUserEmailIndex.
+    Review generated migration code.
+    Do not modify existing migrations that have been pushed.
+    Use seed data carefully.
+    Handle production migrations carefully.
+
+Repository pattern
+    Design pattern that creates an abstraction layer between data access logic and business logic. Provides methods like GetByID, GetAll, Add, Update, etc.
+    Hides EF core implementation details from business logic.
+    Use it because of separation of concerns -> Business logic does not know about database details. Easy to mock repos in unit tests. Can swap out data sources without changing business logic. All queries are in one place.
+    Can argue EF Cores DbSet<T> is already a repo but it depends on overall size and complexity of project.
+
+N+1
+    Most common EF core performance issue. Happens when query for N parent entities (1 query). Then loop through them and query for related data (N additional queries). Total is 1+N queries.
+    To avoid this, use Include() to eager load related data in single query with JSONs. Select() to project only data you need. 
+
+Pagination
+    Never load all records from large tables
+    Use Skip() and Take() to load pages
+    Essential for tables with thousands of records
+
+Filter before Include: 
+    Apply Where() before Include() to reduce data loaded
+    Only loads related data for filtered results
+
+Indexes
+    Ensure foreign keys and frequently queried columns have database Indexes
+    Can configure in EF core using Fluent API
+
+Architecture
+
+    Separation of concerns
+    Presentation Layer - Controller
+        Handles HTTP requests
+        Validates incoming data
+        Returns appropriate status codes
+        Must be thin and should delegate work to services. It should NOT contain business logic or directly access database.
+
+    Business Layer - Services
+        Contains your application's business rules
+        Orchestrates operations between repositories
+        Performs calculations, validations, and transformations
+        Should focus purely on business operations and NOT know about HTTP or databases directly
+
+    Data Layer = Repository
+        Handles all database operations
+        Executes queries and saves data
+        Should be simple CRUD operations and should NOT contain busines logic
+
+    Why? To be more maintainable, testabile (can test one layer without the others) and reusable. Also higher clarity.
+
+Async
+    Allows code to be non-blocking. Thread is released to handle other work when await is called
+    Allows for scalability since application can handle more concurrent requests
+    UI applications remain responsive during long operations
+    Resource efficiency - better use of server resources
+    How?
+        When you await an I/O operation (query, request, read, etc.), the method pauses and returns control to caller. When operation completes, the method resumes
+    When?
+        Database operations, HTTP requests, File I/O (read, write)
+    When NOT?
+        CPU bound operations -> Use Task.Run() to run in background
+        Simple operations
+        Over-optimization
+    Patterns 
+        sequential async operations wait for one before starting next (use when operation B depends on result of operation A)
+        parallel async operations start multiple at once and wait for all. Use Task.WhenAll() when operations are independent. Dramatically faster for multiple API calls/database queries
+    Practices
+        async all the way throughout the layer
+        Dont use .Result or .Wait() to prevent deadlocks
+        Always use async Task not async void
+    
+Authentication (who are you? -> Verifying, logging in) and Authorization (what can you do? -> Checking permissions, happens after Authentication)
+
+    Authentication approaches
+    Cookie based (traditional)
+        Server creates session, sends cookie to browser. Browser sends cookie with each request. Good for server-rendered web apps.
+    JWT (modern web apps)
+        Server creates signed token containing user info. CLient stores token. Client sends token in Authorization header. Stateless. Good for APIs, microservices.
+    OAuth 2.0 (third party)
+        Login with Google, github, etc.
+        Delegates auth to 3rd party 
+        Good for avoiding password management, social Login 
+    
+    Authorization approaches
+    Role base (RBAC)
+        Users have roles such as Admin, User, Manager. Permissions granted to roles. Simple and common
+    Claims based
+        More flexible than roles. User has claims (key-value pairs such as Age, Department, etc.). Can check specific claims for Authorization
+    Policy based
+        Define complex authorization rules. Combine multiple requirements. Most flexible.
+    
+    Happens at controller level. At action level -> Different permissions for different endpoints. In business logic -> Check user permissions before performing operations.
+
+SOLID
+    Single responsiblity principle - Each class should only have one reason to change. Easier to understand and test. Changes in one area don't break the rest 
+    Open/Closed principle - Open for extension, closed for modification. Add new functionality without changing code. Reduces risk of breaking existing functionality when adding features
+    Liskov principle - Derived classes must be substitutable for their base classes. Given a base class, any derived class should be able to replace it without breaking program. Ensures inheritence is used correctly and polymorphism as well.
+    Interface principle - Better to have small specific interfaces than one large, general interface. Classes only implement what they need, avoiding dummy implementation
+    Dependency inversion principle - Depend on abstractions, not concretions. High level modules shouldn't depend on low-level modules. Both should depend on abstractions
+
+NET 6.0
+    Whenever write programs with C#, you're actually using .NET.
+    C# doesn't get turned into machine code like other compilers; instead, it is compiled into IL (intermediate language). IL is very low level, just like assembly. It is essentially unreadable to the average programmer.
+    IL is then ran by your version of .NET framework
+
+    Features
+        Minimal APIs    
+            Simplified way to create APIs with less boilerplate code. Instead of creating controllers and using traditional MVC pattern, you can create endpoints directly in Program.cs 
+            Use for small microservices, simple CRUD APIs, prototypes and demos, less ceremony
+            Avoid for complex applications with many endpoints, when we need advanced features, large enterprise applications 
+        Performance Improvements
+            Faster startup time, better memory collection, improved JSON serialization, file I/O improvements, LINQ optimizations
+        Hot Reload
+            Ability to modify code while application is running and see changes immediately without restarting
+            Faster development cycle, immediate feedback, less time waiting for app restarts
+        C# 10
+            Global usings -> Declare usings once for entire project
+            File scoped namespaces -> Less indentation, cleaner code
+            Record structs -> Immutable value types with less boilerplate
+            Improved pattern matching -> More expressive conditional logic
+            Required properties -> Enforce property initialization
+            Improved dependency injection -> Better performance and easier config of services 
+            Separate dateOnly and timeOnly types 
+        System 
+            System.Collections.Generic 
+            System.Linq 
+            System.Threading.Tasks 
+            System.Text.Json 
+            System.Net.Http 
+            Microsoft.EntityFrameworkCore
+        Tooling
+            dotnet new (create new project)
+            dotnet build (compile code)
+            dotnet run (run application)
+            dotnet test (unit tests)
+            dotnet publish (deployment)
+        NuGet -> Like NPM for Node.js
+    
+    ASP.NET Core overview
+        Microsoft framework for building web applications and APIs. Modular, cross platform, cloud ready 
+        Types of projects
+            Web APIs -> Restful services that return XML/JSON and is used by mobile apps or single page applications (react, angular)
+                Key concepts are controllers, routing, HTTP verbs, status codes
+            MVC Applications -> Traditional web applications with server-rendered pages. Model deals with business logic. View handles UI. Controller handles requests and coordinates model and View
+            Razor pages -> Simplified page-focused programming model. Easier than MVC for simple scenarios
+            Blazor -> Build interactive Web UIs using C# instead of JS. Can run in browser (web-assembly) or server side.
+        Concepts
+            Middleware pipeline -> Request pipieline is made up of middleware components. Each piece of middleware
+                Handles aspect of request
+                Can short circuit pipeline or pass to next middleware
+                Process response on way back
+                Authentication before authorization
+                Common
+                    UseRouting -> Matching requests to endpoints 
+                    UseAuthentication -> Identifies user 
+                    UseAuthorization -> Checks what user can do 
+                    UseStaticFiles -> Serves images, CSS, JS files 
+                    UseEndpoints -> Defines endpoints 
+            Dependency Injection -> Register services in Program.cs and inject them where needed.
+                Translent -> New instance every time (lightweight)
+                Scoped -> One instance per request (use for DB contexts, request-specific data)
+                Singleton -> One instance for application lifetime (use for config, caching)
+            Configuration system
+                Layered config system -> appsettings.json, appsettings.Development.json, env variables
+                Strongly typed 
+            Routing
+                Maps URLs to endpoints.
+                Conventional routing -> Define patterns globally
+                Attribute routing -> Use attributes on controllers/actions (more common, more flexible)
+                Routes can have parameters, constraints, default values
+            Model binding
+                Automatically converts HTTP request data into C# objects.
+                    Query strings -> Method parameters
+                    JSON body -> Complex objects
+                    Route values -> parameters
+                    Form data -> Models 
+            Model validations
+                Validates incoming data using Data Annotations
+                    [Required] [StringLength] [Range] [EmailAddress]
+                    Automatic validation before action executes
+                    Returns BadRequest with validation errors
+            Filters
+                Execute code before or after specific stages in request pipeline
+                Auth filters
+                Action filters -> Before/after Methods
+                Exception filters 
+                Result filters -> Modifying action results
+            Authentication (JWT, Cookies, OAuth)
+            Authortization (Role based, policy based, claims based)
+        Best Practices
+            Use Aynch/Await everywhere -> All I/O operations
+            Proper error handling -> Use exception middleware, return appropriate status codes, don't expose internal errors
+            Logging -> Built in ILogger, log at appropriate levels
+            Security -> Always HTTPS, validate Input, use Authen/Authoriz 
+            API verisioning -> Use versioning to avoid breaking clients. Plan for API changes from start
+            Health checks -> Monitoring and load balancers
+
+        Interview
+            Request lifecycle: Request -> Middleware Pipeline -> Routing -> Model Binding -> Action exection -> Result
+            .NET v .NET Core -> Core is cross platform, modern, developed
+            Why ASP.NET core -> Performance, cross platform, strong typing/tooling, support
+            Middleware v Filters -> Middleware runs for every request, broader scope. Filter runs for specific actions, more targeted.
+
+System Design
+
+    Sizes
+        Bits -> 0 or 1
+        Byte = 8 Bits
+    Storage
+        Main
+            HDD (non volatile)
+            SSD is much faster
+        RAM primary active data holder
+            DS, Variables
+            Volatile memory
+        Cache
+            L1 (closest)
+            L2
+            More frequently used memory
+    CPU
+        Code compiled into machine code, then CPU executes
+
+    Pipeline
+        Automating deployment -> Continuous integration, continuous deployment
+        Needs load balancer, then connected to Storage
+        Logging and monitoring to detect failures -> Alert services
+        Don't debug in production but rather in staging (copy of production)
+    
+    Pillars
+        Good design -> Scalability, Maintainability, Efficiency, Reliability
+        Moving Data
+            Between DB, Devs, Users
+        Storing Data
+            Access patterns, indexing strategies, backup solutions
+        Transforming Data
+            Json, Sql -> User readable
+        CAP theorem
+            Consistency -> Data remains consistent across all users
+            Availability -> System is reliable and open to take requests
+                Measured in percentage (99% uptime v downtime)
+                SLO - Service level objectives (300ms, 99%)
+                SLA - Service level agreements (99.99% agreement)
+                Reliability, Fault tolerance, redundancy
+            Partition tolerance -> Ability to continue working even if parts are not working
+            Can only get 2 of the 3
+        Speed 
+                Throughput -> How much our data can handle over a certain period of time (requests per second, queries per second)
+                Latency -> How long it takes to handle a single request
+        Network
+            IP -> Unique adress (32 bit -> now becoming 128 bit)
+            Computers communicate by sending over server with IP header
+            IP Layer -> Internet protocol
+            Application layer -> HTTP data
+            Transport layer -> TCP (Transmission control protocol): Reliability, holds information about port numbers
+                3 way handshake -> SYN, SYN ACK, ACK
+                UDP (user datagram) is less reliable but faster -> Video calls where data loss is accetable but speed loss is not
+            DNS (Domain Name System) -> Human readable that maps to IP address
+            Infrastructure -> 
+                Public, private IP addresses
+                tatic or dynamic (residential) IP addresses
+                LAN (local area network)
+                PORTS (80 HTTP, 443 HTTPS, etc)
+            HTTP -> Hyper Text Transfer Protocol
+                Contains URL, Method, Code, Address, etc.
+                Return codes
+                    2xx is success codes
+                    3xx is redirection codes
+                    4xx is client error codes
+                    5xx is server error codes
+                Methods
+                    GET -> Retrieve information
+                    POST -> Create information
+                    PATCH -> Update information
+                    DELTE -> Delete information
+            Websockets
+                Two way communicationg between server and client
+                Constant updates
+                Live chats, stock markets, sports feeds, etc.
+            SMTP (Email transmission)
+                IMAP -> Retrieve emails from server
+                POP3 -> Download emails from server
+            File transfer protocols -> 
+                FTP: tranferring files over thje internet
+                SSH: Command line login and file transfer
+
+            WebRTC: Browser to browser applications for voice valling, video chat
+            MQTT: Lightweight message protocol
+            AMQP: Protocol for message oriented Middleware
+
+        API
+            Application Programming interface
+            CRUD -> Create, Read, Update, Delete
+            REST -> Representational state transfer 
+                Stateless
+                Standard HTTP methods
+                Over fetching and under fetching
+                JSON for data exchange
+            Graph QL
+                Avoids under and over fetching
+                Strongly typed schema based queries
+                Only POST requests
+                Responds with 200 OK
+            Limit, Offeset, Start date, End date -> Allows for specific informatino
+            Idempotent -> Calling same method always returns same data
+            Set Rate limits to limit number of reqeusts by users
+            CORS -> Cross origin resource sharing so we can control which domains access our API 
+            Caching improves efficiency by storing copy of data in temporary storage
+                Browser caching -> Users system 
+                    Cache hit and Cache miss -> Cache ratio is hits/misses+hits
+                Server caching -> Server side stored on separate cache server or actual server. Checks here first before querying database
+                    Write through cache writes to cache server and database at same time -> May be slower
+                    Write back writes to cache first then from cache to database -> Might lose data
+                Database caching
+                    Can be within database itself or external layer
+                    Query goes to cache first then database if not found
+                CDNs
+                    Network of servers around the world
+                    Take from origin server which sends to nearest CDN server to user. If it has in cache, it sends to user, otherwise fetches from server and caches it (Pull based)
+                    - Pull based -> Pulls from server then places in cache
+                    - Push based -> Upload to server then push to CDN servers
+                    Reduced latency, high Availability, improved security
+                Eviction policies
+                    Least recently used (LRU)
+                    First In First Out (FIFO)
+                    Least frequently used (LFU)
+        Proxy server
+                Intermediary between client requesting a resource and the server providing that resource
+                Can provide caching resources, load balancing, security, etc.
+                Types
+                    Forward proxy (Client -> F Proxy -> Internet server) -> In front of clients and used to send requests to other servers. Internal networks, hides client
+                        Used to cache frequently used websties, anonymize user traffic, manage multiple accounts
+                    Reverse proxy (Client -> R Proxy -> One of many servers) -> In front of one or more websites intercepting requests form internet. Hides backend servers
+                        Used for load balancing, SSL termination, caching, filtering
+                    Transparent 
+                        Idea is that you know its there 
+                    Anonymous
+                        Idea is that it hides your IP
+                    Distorting
+                        Lies abut your IP
+                    Elite
+                        Pretends it doesn't exist 
+                    Open
+                        Anyone can use it 
+            Load balancer (Reverse proxy)
+                Spreading requests to reduce load on servers -> Prevents bottleneck, outages
+                Round Robin -> Each server gets request in order and works best when servers are identical
+                Least connections -> Send request to least busy server, works bset for long-lived requests
+                Least response time -> First server to repond gets request, works best for latency-sensitive systems 
+                IP hashing -> Same client goes to same server, used for session persistence
+                Weighted variants -> Stronger servers get more traffic (most used in real world)
+                Geographic routing -> Closest server wins
+                Consistent hashing -> Minimizes reshuffling when nodes change. Critical for distributed systems
+                Health checks, redundancy, DNS failover since if LB fails, everything fails
+        Databases
+            Relational -> Structured, ACID (Atomicity, Consistency, Isolation, Durability)
+                Examples are MySQL, PostgreSQL
+                Used for transactions, financial data, complex joins
+            NoSQL -> Flexible, horizontally scalable (Split data across servers, range based, hash based, geo based, etc.), weaker consistency guarantees
+                Examples are MongoDB, Redis
+                Used for massive scale, fast iteration, unstructured data
+            Vertical scaling
+                Bigger machine
+                Simpler but limited
+                Single point of failure
+            Horizontal scaling
+                Sharding
+                    Split across servers
+                    Range based, hash based, geo based
+                Replication
+                    Duplicate data for availability 
+                    Master slave -> Read scaling
+                    Master master -> Write scaling, harder
+
+
+
+                    
+

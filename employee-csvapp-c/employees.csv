@@ -1,0 +1,23 @@
+EmployeeId,FirstName,LastName,Department,Salary
+1,Alice,Ng,Engineering,100000
+2,Bob,Smith,Sales,80000
+3,Carla,Diaz,Engineering,120000
+4,David,Lee,Marketing,90000
+5,Eva,Chen,Sales,85000
+6,Frank,Wong,Engineering,110000
+7,Grace,Kumar,Marketing,95000
+8,Helen,Garcia,Sales,78000
+9,Ian,Martinez,Engineering,115000
+10,Judy,Lopez,Marketing,92000
+11,Kevin,Brown,Sales,83000
+12,Linda,Davis,Engineering,105000
+13,Mike,Wilson,Marketing,88000
+14,Nina,Anderson,Sales,79000
+15,Omar,Thomas,Engineering,125000
+16,Paula,Moore,Marketing,91000
+17,Quinn,Taylor,Sales,84000
+18,Rachel,Jackson,Engineering,118000
+19,Sam,White,Marketing,93000
+20,Tina,Harris,Sales,8100021,Sarah,Williams,Software,175000
+22,Lewis,Hamilton,Formula One,23000000
+24,Me,You,Nothing,0
