@@ -141,7 +141,7 @@ public class Program
     // ===== Core Features =====
     // Reads the CSV file, validates headers, parses each row into Employee objects, and collects any errors. 
     // Returns true if successful, false for fatal errors.
-    private static bool TryLoadEmployees(string path, out List<Employee> employees, out List<string> errors)
+    public static bool TryLoadEmployees(string? path, out List<Employee> employees, out List<string> errors)
     {
         employees = new List<Employee>();
         errors = new List<string>();
@@ -346,7 +346,7 @@ public class Program
 
     // ===== Parsing Helpers =====
     // Creates a case-insensitive dictionary mapping column names to their positions in the CSV header row.
-    private static Dictionary<string, int> BuildHeaderIndex(string[] headers)
+    public static Dictionary<string, int> BuildHeaderIndex(string[] headers)
     {
         var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         for (int i = 0; i < headers.Length; i++)
@@ -363,7 +363,7 @@ public class Program
 
     // Converts a CSV row into an Employee object. 
     // Validates that ID is positive, names/department are non-empty, and salary is non-negative.
-    private static bool TryParseEmployee(
+    public static bool TryParseEmployee(
         string[] fields,
         Dictionary<string, int> headerIndex,
         out Employee employee,
@@ -418,12 +418,12 @@ public class Program
     // Splits a CSV line by commas (basic implementation, doesn't handle quoted fields).
     // Doesn't handle embeddeed commas -> Engineering, Software
     // CSVHelper Library is alternative
-    private static string[] SplitCsvSimple(string line)
+    public static string[] SplitCsvSimple(string line)
         => line.Split(',');
 
     // Removes commas from a string to prevent breaking CSV format when writing.
     // Better approach would be to quote the field -> "Engineering Software"
-    private static string EscapeCsvSimple(string value)
+    public static string EscapeCsvSimple(string value)
         => value.Replace(",", " ").Trim();
 
     // ===== Console Input Helpers =====
