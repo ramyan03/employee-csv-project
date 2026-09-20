@@ -49,6 +49,26 @@ WHERE o_pending.order_status = 'pending'
     WHERE o.order_status IN ('paid', 'shipped')
   );
 
+SELECT
+  p.product_id,
+  p.sku,
+  p.name,
+FROM products p
+LEFT JOIN order_items oi ON oi.product_id = p.product_id
+WHERE oi.product_id is NULL;
+
+SELECT
+  c.customer_id,
+  c.first_name,
+  c.last_name,
+  c.email
+  SUM(oi.quantity * oi.unit_price) AS lifetime
+FROM customers c
+INNER JOIN orders o ON o.customer_id = c.customer_id
+INNER JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY c.customer_id, c.first_name, c.last_name, c.email
+GROUP BY lifetime DESC;
+
 -- -----------------------------------------------------
 -- Test 4: No invalid order items (negative price or non-positive quantity)
 -- -----------------------------------------------------

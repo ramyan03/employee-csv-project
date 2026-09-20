@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-// Use memo -> React Hook that memoizes (caches) the result of an expensive calculation so it doesn’t recompute on every render.
-// React recomputes it only when dependencies change, which helps performance by avoiding expensive recalculations. 
-// I typically use it for derived data like sorted or filtered lists, but avoid overusing it for trivial operations.
-// Use state for profile, draft, isEditing (triggers re-renders)
-// Use effect for side effects (loading from localStorage on mount)
 
 const STORAGE_KEY = "user_profile_v1";
 
-// v1 is for future changes
 /*
 ========================================
-INTERVIEW NOTES — User Profile React App
+User Profile React App
 ========================================
 
 What this app does:
@@ -28,74 +22,8 @@ Key design decision (state management):
 - draft   = editable working copy (allows undo/cancel without mutating saved state)
 This mirrors real apps where edits are staged before commit.
 Single state object would require complex history tracking or cloning to implement undo
-
-Performance / re-render notes:
-- useMemo for derived birthday check (cheap, but shows intent)
-- Field/InputField are extracted components to keep JSX clean
-
-Follow-up answers:
-- Prevent unnecessary re-renders: memoization, splitting components, avoid derived state
-- API errors/slow API: would add loading/error state, retry, AbortController, optimistic UI where safe
-- TypeScript: would type Profile shape, props, and event handlers for safety
-
-Why no Redux/Zustand?
-- For this simple use case, React's built in useState is sufficient and avoids unnecessary complexity
-- Consider external state management if:
-  - Multiple components need shared state
-  - State updates require complex middleware (logging, undo/redo)
-  - Have deeply nested component trees with prop drilling issues
-
-Prevent unnecessary re-renders
-- Component splitting field and inputFiled so changes to one don't re-render the others
-- Use memoization for expensive components
-- Avoid inline object/array creation (Don't create {...props} in render)
-- Use callback refs instead of effect dependencies when possible
-
-In production:
-- Use API for persistence (POST/users/id)
-- Add loading states (isLoading, isSaving)
-- Handle errors gracefully (show error message, retry logic)
-- Implement optimistic updates (update UI immediately, rollback on failure)
-
-Timezone edge case:
-- Birthdate parsing uses LOCAL date (not UTC) to avoid off-by-one issues.
-
-Concurrent edit problem:
-- Optimistic locking -> Inlcude a version field, increment on save, reject if version mismatch
-- Last-write-wins -> Simple but can lose data
-- Operational transforms -> For real time collab editing (like Google docs)
-- Pessimistic locking -> Lock record while editing (bad UX)
-- Use optimistic locking
-
-API example
-async function saveChanges() {
-  setIsSaving(true);
-  setStatusMsg("");
-  
-  try {
-    const response = await fetch(`/api/users/${userId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(draft)
-    });
-    
-    if (!response.ok) throw new Error('Save failed');
-    
-    const savedData = await response.json();
-    setProfile(savedData);
-    setIsEditing(false);
-    setStatusMsg("Saved successfully.");
-  } catch (error) {
-    setStatusMsg(`Error: ${error.message}`);
-    // Optionally: implement retry logic with exponential backoff
-  } finally {
-    setIsSaving(false);
-  }
-}
 */
 
-// Default profile values
-// In future, using TypeScript, can strongly type these to prevent bad inputs
 const defaultProfile = {
   firstName: "Jane",
   lastName: "Doe",
@@ -109,7 +37,6 @@ const defaultProfile = {
 };
 
 // Safely parses JSON from localStorage and validates that all required profile keys exist. 
-// Returns the parsed object or null if invalid/corrupted.
 function safeParseProfile(raw) {
   try {
     const obj = JSON.parse(raw);
@@ -124,17 +51,9 @@ function safeParseProfile(raw) {
 }
 
 // Validate each key to prevent crashes if localStorage has old/corrupted data
-// If you add new field to defaultProfile, old cached profiles won't break app
-// localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-// Object converted to JSON string
-
-// Parse YYYY-MM-DD as a LOCAL date to avoid timezone off-by-one bugs (common with Date("YYYY-MM-DD")).
-// Returns null if the format is invalid.
-// Parse locally to prevent one-off error. User in PST might see one day before. Ensure birthdate is correct, regardless of timezone
-
 function parseLocalYyyyMmDd(dateStr) {
   if (!dateStr) return null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr); // Matches y/m/d
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
   if (!m) return null;
   const y = Number(m[1]);
   const mo = Number(m[2]);
@@ -153,8 +72,7 @@ function isBirthdayToday(birthdateStr) {
   return bd.getMonth() === now.getMonth() && bd.getDate() === now.getDate();
 }
 
-// Calculates the optimal text color (black or white) for a given background hex color by computing its luminance. 
-// Dynamic so it ensures readable contrast.
+// Calculates the optimal text color (black or white) for a given background hex color by computing its luminance.
 function bestTextColor(bg) {
   if (!bg || typeof bg !== "string") return "#ffffff";
   const hex = bg.startsWith("#") ? bg.slice(1) : bg;
@@ -162,12 +80,10 @@ function bestTextColor(bg) {
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255; // This calculates how bright the background color appears to the human eye. Numbers are standard luminance coefficients
-  return luminance > 0.6 ? "#111827" : "#ffffff"; // If luminence is 0.6, use dark text, else use light text
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255; 
+  return luminance > 0.6 ? "#111827" : "#ffffff";
 }
 
-// Displays a read-only field with a label and value in view mode. 
-// Shows "—" if the value is empty.
 function Field({ label, value }) {
   return (
     <div className="fieldCard">
@@ -177,8 +93,6 @@ function Field({ label, value }) {
   );
 }
 
-// Reusable controlled input component for edit mode. 
-// Renders a labeled input field with specified type and handlers.
 function InputField({ label, id, type = "text", placeholder = "", value, onChange }) {
   return (
     <div className="fieldCard">
@@ -197,9 +111,6 @@ function InputField({ label, id, type = "text", placeholder = "", value, onChang
   );
 }
 
-// profile = saved data (what user last committed)
-// draft   = edit buffer (lets us Undo/Cancel without touching saved profile)
-
 // Main App component
 export default function App() {
   // Manages profile (saved state), draft (working copy), isEditing flag, and statusMsg.
@@ -208,14 +119,6 @@ export default function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
-  // Separation of concerns so each state has its own responsibility
-  // Re render control so changing statusMsg doesn't require spreading profile
-
-  // Load persisted profile on first mount.
-  // If invalid JSON or missing keys, fall back to defaults.
-
-  // Persist profile locally (no backend) so changes survive page reloads
-  // Runs once on mount to load the persisted profile from localStorage
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
@@ -226,7 +129,14 @@ export default function App() {
     }
   }, []);
 
-  // Empty dependency array because we only want to load from localStorage once on mount. Without [], it would run on every render (inf loop)
+  useEffect(() => {
+    if(statusMsg){
+      const timer = setTimeout(() => {
+        setStatusMsg("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMsg])
 
   // Memoizes the birthday check calculation so it only recomputes when the birthdate changes, avoiding unnecessary recalculations on every render.
   const happyBirthday = useMemo(
@@ -238,17 +148,15 @@ export default function App() {
     (isEditing ? draft.favoriteColor : profile.favoriteColor) || "#3b82f6";
   const buttonText = bestTextColor(buttonBg);
 
-  // Random stock photo (stable per user)
-  // Seed ensures same photo appears every time for same user to create more stable professional UX
+
   const photoSeed = `${profile.firstName}-${profile.lastName}`.toLowerCase();
   const stockPhotoUrl = `https://picsum.photos/seed/${encodeURIComponent(
     photoSeed
   )}/1100/320`;
 
-  // Copies the current saved profile to the draft state and switches to edit mode. 
-  // Clears any status messages.
+
   function enterEditMode() {
-    setDraft({ ...profile }); // Creates shallow copy. Do not want to reference same object
+    setDraft({ ...profile });
     setIsEditing(true);
     setStatusMsg("");
   }
@@ -261,20 +169,19 @@ export default function App() {
     setStatusMsg("Edits canceled.");
   }
 
-  // Resets the draft to match the saved profile but stays in edit mode, 
-  // allowing users to undo their current edits without exiting.
   function undoChanges() {
     setDraft({ ...profile }); 
     setStatusMsg("Changes undone.");
   }
 
   // Save is the "commit": validate draft, persist to localStorage, then promote draft -> profile.
-  // Validates the draft data (email, names, color format, birthdate), 
-  // then commits it by updating the profile state, persisting to localStorage, and exiting edit mode. 
-  // Shows validation errors if any field is invalid.
   function saveChanges() {
     if (!draft.email.trim()) {
       setStatusMsg("Email cannot be empty.");
+      return;
+    }
+    if(!/^[a-zA-Z0-9]+a-zA-Z0-@[9]+\\.[A-Za-z]{2,3}$/.test(draft.email)){
+      setStatusMsg("Email is not formatted correctly.");
       return;
     }
     if (!draft.firstName.trim() || !draft.lastName.trim()) {
@@ -295,19 +202,14 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     setIsEditing(false);
     setStatusMsg("Saved successfully.");
+
   }
 
-  // Validate at save time rather than every keystroke to avoid annoying user
-  // Check required fields, format validation, type safety (Add TypeScrirpt in production to catch type errors at compile time)
-
-  // Updates a specific field in the draft state when the user types in an input. 
-  // Clears any status message to provide fresh feedback.
   function handleDraftChange(key, value) {
     setDraft((prev) => ({ ...prev, [key]: value }));
     setStatusMsg("");
   }
-  // (prev) => ensures we're working with latest state
-  // Prevents race conditions if multiple updates happen quickly
+
 
   return (
     <div className="page">
@@ -433,7 +335,8 @@ export default function App() {
               <InputField
                 label="Favorite Color (hex)"
                 id="favoriteColor"
-                placeholder="#22c55e"
+                placeholder="color"
+                type="color"
                 value={draft.favoriteColor ?? ""}
                 onChange={(e) => handleDraftChange("favoriteColor", e.target.value)}
               />

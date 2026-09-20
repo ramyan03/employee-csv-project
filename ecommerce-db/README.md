@@ -73,11 +73,13 @@ If the database grows too large to manage efficiently, I would:
 
 ### Create Database
 ```sql
+DROP DATABASE IF EXISTS ecommerce_db;
 CREATE DATABASE ecommerce;
+\q
 
 Run the SQL scripts using psql in the following order:
-psql -U postgres -d ecommerce -f schema.sql
-psql -U postgres -d ecommerce -f indexes.sql
-psql -U postgres -d ecommerce -f seed.sql
+psql -d ecommerce -f schema.sql
+psql -d ecommerce -f indexes.sql
+psql -d ecommerce -f seed.sql
 
 Included tests.sql to validate key business rules and data integrity.

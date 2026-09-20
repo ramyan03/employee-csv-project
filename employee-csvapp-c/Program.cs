@@ -3,23 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-// System for core utilities like console, string, exception
-// Generic for Lists, Dictionary
-// Globalization for culture invariant parsing for CSV -> decimal.Parse(1234.56, CultureInfo.InvariantCulture) always works regardless of country
-// IO for file operations
-// LINQ queries
-/*
-They import namespaces so I can use their classes without fully qualifying them.
-System gives core utilities,
-Collections.Generic provides typed collections like List, like List<Employee> employees = new List<Employee>();
-Globalization handles culture formatting, TryParse
-IO supports file handling,
-and Linq enables functional querying over collections.
-*/
 
 /*
 ========================================
-INTERVIEW NOTES — Employee CSV Processor
+Employee CSV Processor
 ========================================
 
 What this program does:
@@ -37,15 +24,6 @@ Why this design:
   - "Fail fast" for fatal errors (missing file, empty file, missing columns)
   - "Continue with warnings" for bad rows (skip malformed rows, report line number)
 - LINQ used for analytics for clarity/maintainability
-
-Follow-up answers (backend style):
-- async/await: not necessary here (CLI + local file), but for APIs/DB calls I'd use async I/O
-- DI: not used in this single-file console app; in ASP.NET I'd inject services/repositories via constructors
-- concurrency: if two users update the same record in DB, use optimistic concurrency (rowversion) or transactions
-- auth: if this were an API, I'd add JWT auth + [Authorize] on endpoints
-
-If production:
-- Add logging (structured), unit tests, better CSV parsing (quoted commas), and persistent storage (DB).
 */
 
 
@@ -54,21 +32,11 @@ public class Program
     private static readonly string[] RequiredColumns =
         { "EmployeeId", "FirstName", "LastName", "Department", "Salary" };
     
-    // Prevents accidental modification
-
-    // The program's entry point. 
-    // Displays a menu loop where users can analyze employee data, list employees, add new ones, or reload the CSV file.
     public static void Main(string[] args)
     {
         Console.WriteLine("=== Employee CSV Processor ===");
 
         string csvPath =  args.Length > 0 ? args[0] : Prompt("Enter path to employees.csv", "employees.csv");
-
-        // Load once at startup.
-        // Supports both command-line arg and interactive prompt
-        // Fatal validation errors stop the program; non-fatal row issues become warnings.
-        // Validate required columns up front so later parsing can rely on headerIndex.
-        // This is "fail fast" on incorrect CSV format.
 
         // Load once at startup
         if (!TryLoadEmployees(csvPath, out var employees, out var loadErrors))
@@ -92,6 +60,7 @@ public class Program
             Console.WriteLine("2) List employees (first 20)");
             Console.WriteLine("3) Add new employee");
             Console.WriteLine("4) Reload from CSV");
+            Console.WriteLine("5) Search by First name");
             Console.WriteLine("0) Exit");
 
             var choice = Prompt("Choose an option", "1").Trim();
@@ -129,6 +98,10 @@ public class Program
                     }
                     break;
 
+                case "5":
+                    searchEmployee(employees);
+                    break;
+                
                 default:
                     Console.WriteLine("Unknown option. Try again.");
                     break;
@@ -140,15 +113,14 @@ public class Program
 
     // ===== Core Features =====
     // Reads the CSV file, validates headers, parses each row into Employee objects, and collects any errors. 
-    // Returns true if successful, false for fatal errors.
     public static bool TryLoadEmployees(string? path, out List<Employee> employees, out List<string> errors)
     {
         employees = new List<Employee>();
         errors = new List<string>();
-        // Must be assigned
+        
         try
         {
-            if (string.IsNullOrWhiteSpace(path)) // Checks if string is empty or null
+            if (string.IsNullOrWhiteSpace(path))
             {
                 errors.Add("CSV path is empty.");
                 return false;
@@ -161,7 +133,7 @@ public class Program
             }
 
             // Check accessibility
-            using (var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) // Opens existing file at specified path for reading only by current process while allowing other processes to open file for read/write
+            using (var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var reader = new StreamReader(stream))
             {
                 string? headerLine = reader.ReadLine();
@@ -182,20 +154,19 @@ public class Program
                         errors.Add($"Missing required column: '{col}'. Found columns: {string.Join(", ", headers)}");
                     }
                 }
-                // Validate all columns so we can fail fast. No point parsing rows if headers are wrong. Can also determine which headers failed.
-                if (errors.Count > 0) return false; // Fatal if any column missing
+                
+                if (errors.Count > 0) return false; 
 
-                int lineNumber = 1; // Tracks current line for error messages
-                string? line; // Can be null
+                int lineNumber = 1;
+                string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
                     lineNumber++;
-                    if (string.IsNullOrWhiteSpace(line)) continue; // Skip blank lines
+                    if (string.IsNullOrWhiteSpace(line)) continue;
 
                     var fields = SplitCsvSimple(line);
 
-                    // declares an output variable inline and passes it to the method so the method can assign a value to it. 
-                    // This is commonly used in C# Try-pattern methods to return multiple values while also indicating success or failure.
+                    
                     if (!TryParseEmployee(fields, headerIndex, out var emp, out var rowError)) 
                     {
                         errors.Add($"Line {lineNumber}: {rowError} | Raw: {line}");
@@ -224,13 +195,8 @@ public class Program
             return false;
         }
 
-        // Specific exceptions first (UnauthorizedAccessException, IOException)
-        // Generic exception last (catch all)
-        // Each provides context-specific message
     }
 
-    // Analytics are expressed as LINQ queries for readability and correctness.
-    // Performs data analysis using LINQ: 
     // Calculates total salary per department, finds the highest-paid employee, and computes average salary.
     private static void ShowAnalysis(List<Employee> employees)
     {
@@ -252,28 +218,16 @@ public class Program
                 Total = g.Sum(x => x.Salary)
             });
 
-            // Groups employees by department (ignores case). Returns key=department, value=employee
-            // Order by department name alphabetically
-            // Projects each group to anonymous object. Department is key. Total is sum of all salaries in that group
-
-            /*
-            SQL Equivalent:
-            SELECT Department, SUM(Salary) as Total
-            FROM employees
-            GROUP BY Department
-            ORDER BY Department
-            */
-
         foreach (var item in totalsByDept)
         {
-            Console.WriteLine($"- {item.Department}: {item.Total.ToString("C", CultureInfo.CurrentCulture)}"); // Culture is regional settings. CurrentCulture determines how data is formatted and interpreted
+            Console.WriteLine($"- {item.Department}: {item.Total.ToString("C", CultureInfo.CurrentCulture)}");
         }
 
         // Highest salary employee
         var highest = employees
             .OrderByDescending(e => e.Salary)
             .ThenBy(e => e.LastName)
-            .ThenBy(e => e.FirstName) // In case of ties
+            .ThenBy(e => e.FirstName)
             .First();
 
         Console.WriteLine("\nHighest salary employee:");
@@ -301,13 +255,21 @@ public class Program
     {
         Console.WriteLine("\n=== Add New Employee ===");
 
-        int id = PromptInt("EmployeeId", min: 1);
+        var highestId = employees
+            .OrderByDescending(e => e.EmployeeId)            
+            .First();
+        
+        var id = highestId.EmployeeId + 1;
 
-        if (employees.Any(e => e.EmployeeId == id))
+        /*int id = PromptInt("EmployeeId", min: 1);
+
+        while(employees.Any(e => e.EmployeeId == id))
         {
             Console.WriteLine($"EmployeeId {id} already exists. Aborting add.");
-            return;
+            
+            id = PromptInt("EmployeeId", min: 1); 
         }
+        */
 
         string first = PromptNonEmpty("FirstName");
         string last = PromptNonEmpty("LastName");
@@ -345,7 +307,6 @@ public class Program
     }
 
     // ===== Parsing Helpers =====
-    // Creates a case-insensitive dictionary mapping column names to their positions in the CSV header row.
     public static Dictionary<string, int> BuildHeaderIndex(string[] headers)
     {
         var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -357,12 +318,16 @@ public class Program
         }
         return dict;
     }
-    // Trims white space
-    // Skips duplicates (ContainsKey(key)) so we only keep first one
-    // Skip empty columns (keyLength > 0)
+
+    private static void searchEmployee(List<Employee> employees){
+
+        string searchName = PromptNonEmpty("Search by Name");
+        var filteredEmployees = employees.Where(e => e.FirstName.Contains(searchName)).ToList();
+        ListEmployees(filteredEmployees, filteredEmployees.Count());
+
+    } 
 
     // Converts a CSV row into an Employee object. 
-    // Validates that ID is positive, names/department are non-empty, and salary is non-negative.
     public static bool TryParseEmployee(
         string[] fields,
         Dictionary<string, int> headerIndex,
@@ -375,7 +340,7 @@ public class Program
         string Get(string col)
         {
             int idx = headerIndex[col];
-            return idx < fields.Length ? fields[idx].Trim() : ""; // Looks up column index from header. Returns trimmed value or empty string if row is too short. Ensures not out of bounds
+            return idx < fields.Length ? fields[idx].Trim() : ""; 
         }
 
         var idStr = Get("EmployeeId");
@@ -389,15 +354,13 @@ public class Program
             error = $"Invalid EmployeeId '{idStr}'";
             return false;
         }
-        // NumberStyles.Integer allows 123, -123, +123, etc. Rejects decimal and thousands separator
-        // id<=0 check since ID should be positive integers
 
         if (string.IsNullOrWhiteSpace(first) || string.IsNullOrWhiteSpace(last) || string.IsNullOrWhiteSpace(dept))
         {
             error = "FirstName/LastName/Department must be non-empty";
             return false;
         }
-        // Rejects white space "  "
+
 
         if (!decimal.TryParse(salStr, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal salary) || salary < 0)
         {
@@ -405,29 +368,18 @@ public class Program
             return false;
         }
 
-        // NumberStyles.Number allows for 75000, 75000.50, -100, etc. InvariantCulture always uses . as decimal, not ,
-        // Salary < 0 since salary may be 0, but never negative
-
         employee = new Employee(id, first, last, dept, salary);
         return true;
     }
 
-    // NOTE: Simple CSV splitting works for this challenge input.
-    // In production, use a real CSV parser to support quoted fields/embedded commas.
-
     // Splits a CSV line by commas (basic implementation, doesn't handle quoted fields).
-    // Doesn't handle embeddeed commas -> Engineering, Software
-    // CSVHelper Library is alternative
     public static string[] SplitCsvSimple(string line)
         => line.Split(',');
 
-    // Removes commas from a string to prevent breaking CSV format when writing.
-    // Better approach would be to quote the field -> "Engineering Software"
     public static string EscapeCsvSimple(string value)
         => value.Replace(",", " ").Trim();
 
     // ===== Console Input Helpers =====
-
     // Displays a prompt and reads user input, returning the default if input is empty.
     private static string Prompt(string label, string defaultValue = "")
     {
@@ -481,49 +433,3 @@ public record Employee(
     string Department,
     decimal Salary
 );
-
-// Record instead of class because:
-/*
-** Value based equality (two employees with same id, name, etc. will be equal)
-** Immutability (doesn't override older entities)
-** Concise syntax
-** Thread safety -> Immutable objects are thread safe. No need for locks when sharing between threads
-**
-** Tradeoffs are that records are reference types (heap storage), slightly slower than structs for smaller data
-*/
-
-/*
-
-Error handling:
-    Distinguish between fatal errors and recoverable warnings. 
-        Fatal (fail fast): Missing file, empty file, missing columng -> Stop execution
-        Recoverable: Warn and continue -> Skip it, log line number, continue processing
-    Gives actionable feedback
-
-Try pattern:
-    Idiomatic C# for opertions that can fail without throwing exceptions. Returns bool for success/failure and uses out parameters for result and error message
-    Avoids exception overhead for expected failures (malformed CSV rows)
-    Makes error handling explicit in control flow
-
-Decimal over float/double to ensure single decimal places. Slower but correctness and prevents 0.400000004 for example
-
-LINQ over For loop
-    More declarative (what we want)
-    More readable for complex queries and less error prone
-    Easier to modify (if we want to add another layer of filtering/sorting without refactoring loop logic)
-
-Building header index
-    Reason is to make parsing column-order-independent. If CSV has columns in any order, we can still find right value by name
-    Also has case-insensitive matching, handles extra columns gracefully and validates required columns exist upfront
-
-Use CSV library
-    Use for quoted fileds -> "Last, First"
-    Escaped quotes
-    Multi line values
-    Different delimiters/encodings
-
-Why append with File.AppendAllText?
-    Appending is more efficient for large files than read/write entire file
-    Won't work as well if file is sorted and needs to stay sorted, or if we need to validate uniqueness across all rows before writing
-
-*/

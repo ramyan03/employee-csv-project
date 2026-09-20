@@ -10,7 +10,7 @@
 --       3) Customers with no orders
 -- =====================================================
 /*
-INTERVIEW NOTES — Seed Data
+Seed Data
 
 Why seed exists:
 - Demonstrates realistic scenarios for testing queries and constraints
@@ -18,28 +18,6 @@ Why seed exists:
   1) customers outside Canada (non-CA rows exist)
   2) revenue per shipping country (orders + items exist across countries)
   3) customers with no orders (at least one customer without orders exists)
-
-Follow-up:
-- In production, seed data is only for dev/test; prod uses controlled migrations + real data pipelines.
-
-Questions:
-- Scale to millions by paritioning orders/order_items by date to keep working sets smaller
-  - Archiving: Move old orders (>2 years) to archive tables/cold storage
-  - Read replicas
-  - Caching: Cache frequently accessed data (product catalog, customer profiles) in Redis
-- Concurrent updates by using
-  - Optimistic locking -> Add version column to products, check it before updates
-  - Row level locking: SELECT ... FOR UPDATE when processing orders
-  - Transactions: Wrap order creation in BEGIN/COMMIT to ensure atomicity
-  - CHECK constraints to prevent overselling
-- Handle migration
-  - Use versioned migration tools
-  - Expand/contract pattern for breaking changes
-    - Add new column, deploy code that writes to both, backfill data, switch reads to new column, drop old column
-  - Never change schema directly in prod
-  - Always test migrations on a production-like dataset
-  - Have rollback scripts ready
-
 */
 
 BEGIN;
@@ -131,7 +109,6 @@ WHERE c.email = 'alice.ca@example.com'
   AND o.order_status = 'paid'
 LIMIT 1;
 
--- Bob's order (US, USD): 1x Hoodie + 2x Cap
 INSERT INTO order_items (order_id, product_id, quantity, unit_price, currency_code)
 SELECT o.order_id, p.product_id, 1, 45.00, 'USD'
 FROM orders o
@@ -154,7 +131,6 @@ WHERE c.email = 'bob.us@example.com'
   AND o.order_status = 'shipped'
 LIMIT 1;
 
--- Chloe's order (GB, USD): 3x Bag
 INSERT INTO order_items (order_id, product_id, quantity, unit_price, currency_code)
 SELECT o.order_id, p.product_id, 3, 22.00, 'USD'
 FROM orders o
